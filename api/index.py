@@ -6,7 +6,13 @@ import statistics
 
 app = FastAPI()
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 BASE_DIR = Path(__file__).parent
 DATA_FILE = BASE_DIR / "telemetry.json"
