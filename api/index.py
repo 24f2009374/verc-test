@@ -15,9 +15,10 @@ BASE_DIR = Path(__file__).parent
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"],          # allow all origins
+    allow_credentials=False,      # MUST be False with "*"
+    allow_methods=["*"],          # allow POST, OPTIONS, etc
+    allow_headers=["*"],          # allow Content-Type
 )
 
 from fastapi import Response
