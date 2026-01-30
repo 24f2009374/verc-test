@@ -36,10 +36,14 @@ def analyze(payload: dict):
             continue
 
         latencies = [r["latency_ms"] for r in records]
-        uptimes = [r["uptime"] for r in records]
+        uptimes = [r["uptime_pct"] for r in records]
+
+
 
         latencies_sorted = sorted(latencies)
-        p95 = latencies_sorted[int(0.95 * (len(latencies_sorted) - 1))]
+        idx = max(0, int(0.95 * len(latencies_sorted)) - 1)
+        p95 = latencies_sorted[idx]
+
 
         result[region] = {
             "avg_latency": sum(latencies) / len(latencies),
