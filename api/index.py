@@ -12,6 +12,17 @@ from pathlib import Path
 import json
 
 BASE_DIR = Path(__file__).parent
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/api")
+def health():
+    return {"status": "ok"}
+
 
 @app.post("/api")
 def analyze(payload: dict):
