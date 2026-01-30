@@ -39,6 +39,6 @@ def compute(payload: dict):
 
 # ✅ Handle BOTH routes
 @app.post("/")
-@app.post("/api")
+@app.post("/api/analyze")
 def analyze(payload: dict):
     return compute(payload)
