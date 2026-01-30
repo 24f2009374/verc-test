@@ -1,75 +1,50 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
 import json
 import statistics
-from pathlib import Path
 
-BASE_DIR = Path(__file__).parent
-
-app=FastAPI()
-
-from pathlib import Path
-import json
-
-BASE_DIR = Path(__file__).parent
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # allow all origins
-    allow_credentials=False,      # MUST be False with "*"
-    allow_methods=["*"],          # allow POST, OPTIONS, etc
-    allow_headers=["*"],          # allow Content-Type
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-from fastapi import Response
+BASE_DIR = Path(__file__).parent
+DATA_FILE = BASE_DIR / "telemetry.json"
 
-@app.options("/api")
-def options_api():
-    return Response(status_code=200)
-
-
-@app.get("/api")
-def health():
-    return {"status": "ok"}
+with open(DATA_FILE, "r") as f:
+    telemetry = json.load(f)
 
 
-@app.post("/api")
-def analyze(payload: dict):
-    with open(BASE_DIR / "telemetry.json", encoding="utf-8") as f:
-        data = json.load(f)
-
+def compute(payload: dict):
     regions = payload["regions"]
     threshold = payload["threshold_ms"]
 
     result = {}
 
     for region in regions:
-        records = [r for r in data if r["region"] == region]
-
-        if not records:
-            result[region] = {
-                "avg_latency": 0,
-                "p95_latency": 0,
-                "avg_uptime": 0,
-                "breaches": 0,
-            }
-            continue
+        records = [r for r in telemetry if r["region"] == region]
 
         latencies = [r["latency_ms"] for r in records]
         uptimes = [r["uptime_pct"] for r in records]
 
-
-
-        latencies_sorted = sorted(latencies)
-        idx = max(0, int(0.95 * len(latencies_sorted)) - 1)
-        p95 = latencies_sorted[idx]
-
-
         result[region] = {
-            "avg_latency": sum(latencies) / len(latencies),
-            "p95_latency": p95,
-            "avg_uptime": sum(uptimes) / len(uptimes),
-            "breaches": sum(1 for l in latencies if l > threshold),
+            "avg_latency": round(statistics.mean(latencies), 2),
+            "p95_latency": round(statistics.quantiles(latencies, n=20)[18], 2),
+            "avg_uptime": round(statistics.mean(uptimes), 2),
+            "breaches": sum(1 for l in latencies if l > threshold)
         }
 
     return result
+
+
+# ✅ Handle BOTH routes
+@app.post("/")
+@app.post("/api")
+def analyze(payload: dict):
+    return compute(payload)
