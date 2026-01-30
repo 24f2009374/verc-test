@@ -4,7 +4,7 @@ import json
 import statistics
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(__file__).parent.parent
 
 app=FastAPI()
 
