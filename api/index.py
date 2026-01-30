@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import json
 import statistics
+from pathlib import Path
+
+BASE_DIR=Path(__file__).parent
 
 app = FastAPI()
 
@@ -13,7 +16,7 @@ app.add_middleware(
 )
 
 # Load your telemetry data once
-with open("telemetry.json") as f:
+with open(BASE_DIR / "telemetry.json") as f:
     data = json.load(f)
 
 @app.post("/api")
