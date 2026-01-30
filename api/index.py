@@ -12,12 +12,20 @@ from pathlib import Path
 import json
 
 BASE_DIR = Path(__file__).parent
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from fastapi import Response
+
+@app.options("/api")
+def options_api():
+    return Response(status_code=200)
+
 
 @app.get("/api")
 def health():
