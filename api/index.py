@@ -54,10 +54,11 @@ def compute(payload: dict, telemetry: list[dict]):
         }
 
     return result
+ 
 
 
 # ✅ Handle BOTH routes
 @app.post("/")
 @app.post("/api")
 def analyze(payload: dict):
-    return compute(payload)
+    return compute(payload, telemetry)
