@@ -21,7 +21,7 @@ with open(DATA_FILE, "r") as f:
     telemetry = json.load(f)
 
 
-def compute(payload: dict):
+def compute(payload: dict, telemetry: list[dict]):
     regions = payload["regions"]
     threshold = payload["threshold_ms"]
 
@@ -30,13 +30,26 @@ def compute(payload: dict):
     for region in regions:
         records = [r for r in telemetry if r["region"] == region]
 
+        if not records:
+            result[region] = {
+                "avg_latency": 0,
+                "p95_latency": 0,
+                "avg_uptime": 0,
+                "breaches": 0
+            }
+            continue
+
         latencies = [r["latency_ms"] for r in records]
         uptimes = [r["uptime_pct"] for r in records]
 
+        latencies_sorted = sorted(latencies)
+        idx = max(0, int(0.95 * len(latencies_sorted)) - 1)
+        p95 = latencies_sorted[idx]
+
         result[region] = {
-            "avg_latency": round(statistics.mean(latencies), 2),
-            "p95_latency": round(statistics.quantiles(latencies, n=20)[18], 2),
-            "avg_uptime": round(statistics.mean(uptimes), 2),
+            "avg_latency": round(sum(latencies) / len(latencies), 2),
+            "p95_latency": round(p95, 2),
+            "avg_uptime": round(sum(uptimes) / len(uptimes), 2),
             "breaches": sum(1 for l in latencies if l > threshold)
         }
 
