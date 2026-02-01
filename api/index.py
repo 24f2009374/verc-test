@@ -14,6 +14,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi import Response
+
+@app.options("/")
+def cors_preflight():
+    return Response(status_code=204)
+
+
 BASE_DIR = Path(__file__).parent
 DATA_FILE = BASE_DIR / "telemetry.json"
 
